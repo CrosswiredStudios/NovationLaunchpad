@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Commons.Music.Midi;
 using NovationLaunchpad.Interfaces;
 
+// https://d2xhy469pqj8rc.cloudfront.net/sites/default/files/novation/downloads/10529/launchpad-mk2-programmers-reference-guide-v1-02.pdf
+
 namespace NovationLaunchpad.Models.Launchpads
 {
     public enum LaunchpadMk2Color : byte
