@@ -131,6 +131,49 @@ namespace NovationLaunchpad.Models.Launchpads
         }
         #endregion
 
+        /// <summary>
+        /// Sets the color of a grid button
+        /// </summary>
+        /// <param name="id">The id of the button</param>
+        /// <param name="color">The color to set the button to.</param>
+        public void SetGridButtonColor(int id, Color color)
+        {
+            try
+            {
+                // Logisticaly update the button
+                var button = Grid[id % 10 - 1, id / 10 - 1];
+                button.Color = color;
+                
+                // Create and send a command to set the light color
+                var command = new byte[]
+                {
+                    240, 0, 32, 41, 2, 24, 11,
+                    (byte) id,
+                    (byte) (color.R / 4),
+                    (byte) (color.G / 4),
+                    (byte) (color.B / 4),
+                    247
+                };
+                _output?.Send(command, 0, command.Length, 0);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Unable to set the grid button color. {ex}");
+            }
+        }
+
+        /// <summary>
+        /// Sets the color of a grid button
+        /// </summary>
+        /// <param name="x">Grid x coordinate</param>
+        /// <param name="y">Grid y coordinate</param>
+        /// <param name="color">The color to set the button to</param>
+        public void SetGridButtonColor(int x, int y, Color color)
+        {
+            // Convert x-y to id
+            SetGridButtonColor((y + 1) * 10 + x + 1, color);
+        }
+
         public void SetGridColor(Color[,] colors)
         {
             try
