@@ -10,6 +10,8 @@ namespace NovationLaunchpad.Interfaces
         event OnCompleteEvent OnComplete;
 
         string Name { get; }
+
+        void Dispose();
         void Initiate(ILaunchpad launchpad);
         void Terminate();
         void Update();

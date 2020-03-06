@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using Commons.Music.Midi;
 using NovationLaunchpad.Interfaces;
@@ -52,11 +53,12 @@ namespace NovationLaunchpad.Models.Launchpads
     public class LaunchpadMk2 : LaunchpadBase
     {
         LaunchpadMk2((IMidiInput, IMidiOutput) ports)
-            : base()
+            : base(ports)
         {
-            _input = ports.Item1;
-            _output = ports.Item2;
             CreateGridButtons();
+
+            // Listen for messages from the launchpad
+            ports.Item1.MessageReceived += OnMessageReceived;
         }
 
         public static async Task<LaunchpadMk2> GetInstance(int index = 0)
@@ -69,6 +71,7 @@ namespace NovationLaunchpad.Models.Launchpads
         /// </summary>
         void CreateGridButtons()
         {
+            Grid = new LaunchpadMk2Button[8, 8];
             for (var y = 0; y < 8; y++)
                 for (var x = 0; x < 8; x++)
                 {
@@ -80,6 +83,29 @@ namespace NovationLaunchpad.Models.Launchpads
         {
             var command = new byte[] { 240, 0, 32, 41, 2, 24, 14, 0, 247 };
             _output.Send(command, 0, command.Length, 0);
+        }
+
+        private void OnMessageReceived(object sender, MidiReceivedEventArgs e)
+        {
+            try
+            {
+                switch (e.Data[0])
+                {
+                    // Grid Button Pressed
+                    case 144:
+                        var button = Grid[e.Data[1] % 10 - 1, e.Data[1] / 10 - 1];
+                        button.State =
+                            e.Data[2] == 0
+                                ? LaunchpadButtonState.Released
+                                : LaunchpadButtonState.Pressed;
+                        ButtonStateChanged(button);
+                        break;
+                }
+            }
+            catch
+            {
+
+            }
         }
 
         #region PulseButton
@@ -104,6 +130,39 @@ namespace NovationLaunchpad.Models.Launchpads
             PulseButton(GetButtonId(x, y), (byte)color);
         }
         #endregion
+
+        public void SetGridColor(Color[,] colors)
+        {
+            try
+            {
+                var commandBytes = new List<byte>();
+                for (var y = 0; y < 8; y++)
+                    for (var x = 0; x < 8; x++)
+                    {
+                        var color = colors[x, y];
+                        var id = (y + 1) * 10 + x + 1;
+                        // Logisticaly update the button
+                        var button = Grid[id % 10 - 1, id / 10 - 1];
+                        button.Color = color;
+                        var command = new byte[] { 240, 0, 32, 41, 2, 24, 11, (byte)id, (byte)(color.R / 4), (byte)(color.G / 4), (byte)(color.B / 4), 247 };
+                        _output?.Send(command, 0, command.Length, 0);
+            }
+                
+            }
+            catch (ObjectDisposedException ex)
+            {
+                Disconnected();
+                Debug.WriteLine(ex);
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2147023279)
+                {
+                    Disconnected();
+                }
+                Debug.WriteLine(ex);
+            }
+        }
 
         /// <summary>
         /// Writes all color data in the <see cref="GridBuffer"/> out to the Launchpad.

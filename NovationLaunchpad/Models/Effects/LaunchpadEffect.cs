@@ -3,7 +3,7 @@ using NovationLaunchpad.Interfaces;
 
 namespace NovationLaunchpad.Models.Effects
 {
-    public abstract class LaunchpadEffect : ILaunchpadEffect
+    public abstract class LaunchpadEffect : ILaunchpadEffect, IDisposable
     {
         public event OnChangeFrequencyEvent OnChangeFrequency;
         public event OnCompleteEvent OnComplete;
@@ -15,6 +15,11 @@ namespace NovationLaunchpad.Models.Effects
 
         }
 
+        public virtual void Dispose()
+        {
+
+        }
+
         public virtual void Initiate(ILaunchpad launchpad)
         {
 
@@ -22,7 +27,7 @@ namespace NovationLaunchpad.Models.Effects
 
         public virtual void Terminate()
         {
-
+            OnComplete?.Invoke();
         }
 
         public virtual void Update()
