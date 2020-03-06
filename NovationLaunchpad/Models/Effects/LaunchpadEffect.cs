@@ -29,5 +29,10 @@ namespace NovationLaunchpad.Models.Effects
         {
 
         }
+
+        public virtual void UpdateFrequency(uint newFrequency)
+        {
+            OnChangeFrequency?.Invoke(newFrequency);
+        }
     }
 }

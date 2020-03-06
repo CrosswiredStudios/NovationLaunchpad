@@ -13,7 +13,7 @@ namespace NovationLaunchpad.Models.Launchpads
 {
     public abstract class LaunchpadBase : ILaunchpad
     {
-        protected Dictionary<ILaunchpadEffect, Timer> EffectsTimers { get; }
+        public Dictionary<ILaunchpadEffect, Timer> Effects { get; }
         protected IMidiInput _input;
         protected IMidiOutput _output;
 
@@ -22,6 +22,9 @@ namespace NovationLaunchpad.Models.Launchpads
 
         public LaunchpadBase()
         {
+            Grid = new LaunchpadMk2Button[8, 8];
+            GridBuffer = new Color[8, 8];
+            Effects = new Dictionary<ILaunchpadEffect, Timer>();
         }
 
         protected static byte GetButtonId(int x, int y)
@@ -41,48 +44,22 @@ namespace NovationLaunchpad.Models.Launchpads
         /// <summary>
         /// Add an effect to the launchpad
         /// </summary>
-        /// <param name="effect"></param>
-        /// <param name="updateFrequency"></param>
+        /// <param name="effect">The effect to add to the launchpad.</param>
+        /// <param name="updateFrequency">The frequency at which the update method will be called.</param>
         public void RegisterEffect(ILaunchpadEffect effect, TimeSpan updateFrequency)
         {
             try
             {
-                // Register any observables being used
-                CompositeDisposable effectDisposables = new CompositeDisposable();
-
-                effect.OnChangeFrequency += (frewq) => OnChangeFrequencyEvent(effect, frewq);
-                // If this effect needs the ability to change its frequency
-                if (effect.OnChangeFrequency != null)
-                {
-                    // Subscribe to the event to change the frequency and add it to this effects disposables
-                    effectDisposables.Add(
-                        effect
-                        .WhenChangeUpdateFrequency
-                        .Subscribe(newFrequency =>
-                        {
-                            // Change the frequency for this effect
-                            OnChangeEffectUpdateFrequency(effect, newFrequency);
-                        }));
-                }
-
-                // If this effect will notify us it needs to be unregistered
-                if (effect.WhenComplete != null)
-                {
-                    effectDisposables.Add(
-                        effect
-                        .WhenComplete
-                        .Subscribe(_ =>
-                        {
-                            // Unregister the effect and destroy its disposables
-                            UnregisterEffect(effect);
-                        }));
-                }
-
-                EffectsDisposables.Add(effect, effectDisposables);
-
                 // Create an update timer at the specified frequency
-                EffectsTimers.Add(effect, new Timer(state => effect.Update(), null, 0, (int)updateFrequency.TotalMilliseconds));
-
+                Effects.Add(effect, new Timer(state => effect.Update(), null, 0, (int)updateFrequency.TotalMilliseconds));
+                effect.OnChangeFrequency += (newFrequency) =>
+                {
+                    Effects[effect].Change(0, newFrequency);
+                };
+                effect.OnComplete += () =>
+                {
+                    Effects.Remove(effect);
+                };
                 // Initiate the effect (provide all buttons and button changed event
                 effect.Initiate(this);
             }
@@ -90,6 +67,16 @@ namespace NovationLaunchpad.Models.Launchpads
             {
                 Debug.WriteLine(ex);
             }
+        }
+
+        /// <summary>
+        /// Add an effect to the launchpad
+        /// </summary>
+        /// <param name="effect">The effect to add to the launchpad.</param>
+        /// <param name="updateFrequency">The frequency in milliseconds at which the update method will be called.</param>
+        public void RegisterEffect(ILaunchpadEffect effect, uint updateFrequency)
+        {
+            RegisterEffect(effect, TimeSpan.FromMilliseconds(updateFrequency));
         }
     }
 }

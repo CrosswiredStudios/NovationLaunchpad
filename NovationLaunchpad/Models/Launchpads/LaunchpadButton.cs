@@ -33,7 +33,6 @@ namespace NovationLaunchpad.Models.Launchpads
             set
             {
                 color = value;
-                
             }
         }
         public byte Id { get; set; }

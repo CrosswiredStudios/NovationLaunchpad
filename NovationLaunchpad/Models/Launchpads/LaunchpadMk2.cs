@@ -52,14 +52,28 @@ namespace NovationLaunchpad.Models.Launchpads
     public class LaunchpadMk2 : LaunchpadBase
     {
         LaunchpadMk2((IMidiInput, IMidiOutput) ports)
+            : base()
         {
             _input = ports.Item1;
             _output = ports.Item2;
+            CreateGridButtons();
         }
 
         public static async Task<LaunchpadMk2> GetInstance(int index = 0)
         {
             return new LaunchpadMk2(await GetMidiPorts(index));
+        }
+
+        /// <summary>
+        /// Creates the objects that represent the grid buttons
+        /// </summary>
+        void CreateGridButtons()
+        {
+            for (var y = 0; y < 8; y++)
+                for (var x = 0; x < 8; x++)
+                {
+                    Grid[x, y] = new LaunchpadMk2Button(0, x, y, Color.Black, _output);
+                }
         }
 
         public override void Clear()

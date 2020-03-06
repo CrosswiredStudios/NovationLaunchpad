@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using NovationLaunchpad.Models.Effects.Piskel;
 using NovationLaunchpad.Models.Launchpads;
 
@@ -25,7 +26,13 @@ namespace NovationLaunchpad.Sample
                         launchpad.Clear();
                         break;
                     case "piskel":
-                        launchpad.RegisterEffect(new PiskelEffect("demo.piskel", true));
+                        launchpad.RegisterEffect(new PiskelEffect("demo.piskel", true), 50);
+                        break;
+                    case "piskelfreq":
+                        Console.WriteLine("Enter the new frequency:");
+                        if (!uint.TryParse(Console.ReadLine(), out uint piskelFrequency))
+                            continue;
+                        launchpad.Effects.First().Key.UpdateFrequency(piskelFrequency);
                         break;
                     case "pulse":
                         Console.WriteLine("Pulse");

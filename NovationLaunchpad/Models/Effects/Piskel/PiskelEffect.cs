@@ -143,7 +143,7 @@ namespace NovationLaunchpad.Models.Effects.Piskel
     {
         int currentFrameIndex;
         SKBitmap bitmap;
-        string filePath;
+        string _filePath;
         List<Color[,]> frames;
         bool isFinished;
         bool isInitiated;
@@ -159,7 +159,7 @@ namespace NovationLaunchpad.Models.Effects.Piskel
         {
             frames = new List<Color[,]>();
             isFinished = false;
-            this.filePath = filePath;
+            _filePath = filePath;
             this.loop = loop;
         }
 
@@ -176,33 +176,12 @@ namespace NovationLaunchpad.Models.Effects.Piskel
             launchpad.FlushGridBuffer();
         }
 
-        public async static Task<SKBitmap> ImageFromBytes(Byte[] bytes)
-        {
-            try
-            {
-                var image = new SKBitmap();
-                //using (var stream = new InMemoryRandomAccessStream())
-                //{
-                //    await stream.WriteAsync(bytes.AsBuffer());
-                //    stream.Seek(0);
-                //    await SKBitmap.FromImage.(stream);
-                //}
-                return image;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                return null;
-            }
-        }
-
         public override void Initiate(ILaunchpad launchpad)
         {
             this.launchpad = launchpad as LaunchpadMk2;
             try
             {
-               
-                using (var fileStream = File.OpenText(@"Animations\initiate0.piskel"))
+                using (var fileStream = File.OpenText(_filePath))
                 {
                     var contents = fileStream.ReadToEnd();
                     piskelFile = new PiskelFile(contents);
@@ -231,8 +210,6 @@ namespace NovationLaunchpad.Models.Effects.Piskel
 
 
                 isInitiated = true;
-               
-
             }
             catch (Exception ex)
             {

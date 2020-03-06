@@ -8,4 +8,12 @@
   <ItemGroup>
     <ProjectReference Include="..\NovationLaunchpad\NovationLaunchpad.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="demo.piskel" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="demo.piskel">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>

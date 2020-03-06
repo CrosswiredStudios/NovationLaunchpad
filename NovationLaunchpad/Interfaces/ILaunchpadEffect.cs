@@ -1,7 +1,7 @@
 ﻿using System;
 namespace NovationLaunchpad.Interfaces
 {
-    public delegate void OnChangeFrequencyEvent(int newFrequency);
+    public delegate void OnChangeFrequencyEvent(uint newFrequency);
     public delegate void OnCompleteEvent();
 
     public interface ILaunchpadEffect
@@ -13,7 +13,6 @@ namespace NovationLaunchpad.Interfaces
         void Initiate(ILaunchpad launchpad);
         void Terminate();
         void Update();
+        void UpdateFrequency(uint newFrequency);
     }
-
-   
 }
