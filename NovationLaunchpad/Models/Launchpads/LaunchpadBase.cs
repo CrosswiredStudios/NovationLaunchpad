@@ -43,10 +43,22 @@ namespace NovationLaunchpad.Models.Launchpads
 
         protected static async Task<(IMidiInput, IMidiOutput)> GetMidiPorts(int index = 0)
         {
+            // Get all the connected launchpads
             var access = MidiAccessManager.Default;
-            var launchpadInput = access.Inputs.Where(o => o.Name.ToLower().Contains("launchpad")).ToArray()[index];
-            var launchpadOutput = access.Outputs.Where(o => o.Name.ToLower().Contains("launchpad")).ToArray()[index];
-            return (await access.OpenInputAsync(launchpadInput.Id), await access.OpenOutputAsync(launchpadOutput.Id));
+            var launchpadInputs = access.Inputs.Where(o => o.Name.ToLower().Contains("launchpad")).ToArray();
+            var launchpadOutputs = access.Outputs.Where(o => o.Name.ToLower().Contains("launchpad")).ToArray();
+
+            // Attempt to get the launchpad input at the index requested
+            var launchpadInput = launchpadInputs.Length > index
+                ? await access.OpenInputAsync(launchpadInputs[index].Id)
+                : null;
+
+            // Attempt to get teh launchpad output at the index requested
+            var launchpadOutput = launchpadInputs.Length > index
+                ? await access.OpenOutputAsync(launchpadOutputs[index].Id)
+                : null;
+
+            return (launchpadInput , launchpadOutput);
         }
 
         public void ButtonStateChanged(ILaunchpadButton button)

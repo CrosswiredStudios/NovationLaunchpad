@@ -58,7 +58,8 @@ namespace NovationLaunchpad.Models.Launchpads
             CreateGridButtons();
 
             // Listen for messages from the launchpad
-            ports.Item1.MessageReceived += OnMessageReceived;
+            if(_input != null)
+                _input.MessageReceived += OnMessageReceived;
         }
 
         public static async Task<LaunchpadMk2> GetInstance(int index = 0)
